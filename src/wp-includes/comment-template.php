@@ -1076,15 +1076,17 @@ function comment_text( $comment_id = 0, $args = array() ) {
 
 	$comment_text = get_comment_text( $comment, $args );
 
-	// Encode standalone < and > between digits,
-	// to prevent them being parsed as HTML tags.
-	$comment_text = preg_replace_callback(
-		'/(\d)(\s*)([<>])(\s*)(\d)/',
-		function ( $matches ) {
-			return $matches[1] . $matches[2] . htmlspecialchars( $matches[3] ) . $matches[4] . $matches[5];
-		},
-		$comment_text
-	);
+	if ( is_admin() ) {
+		// Encode < and > in a numeric comparisons,
+		// to prevent them being parsed as HTML tags.
+		$comment_text = preg_replace_callback(
+			'/(<)(\s*\d.*?)(>)(\s*\d+)/',
+			function ( $matches ) {
+				return htmlspecialchars( $matches[1] ) . $matches[2] . htmlspecialchars( $matches[3] ) . $matches[4];
+			},
+			$comment_text
+		);
+	}
 
 	/**
 	 * Filters the text of a comment to be displayed.
